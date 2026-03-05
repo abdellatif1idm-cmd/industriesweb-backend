@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// TABLE : submissions
+// Une seule table pour tous les formulaires
+// identifiée par source + plan + type
+// ─────────────────────────────────────────
+model Submission {
+  id        String   @id @default(uuid())
+
+  // ── Identification ──────────────────────
+  // source : "PLANT MANAGER MEETING" | "FMEC"
+  source    String
+
+  // plan : "contact" | "vip" | "sponsoring" | "stand"
+  plan      String
+
+  // type : "gold" | "platinum" | "silver" | "prestige"
+  //        | "officiel" | "stand-standard" | "stand-premium"
+  //        | null pour contact
+  type      String?
+
+  // ── Champs communs à tous les formulaires ──
+  firstName     String  @map("first_name")
+  lastName      String  @map("last_name")
+  email         String
+
+  // ── Champs optionnels selon le formulaire ──
+  phone         String?   // Contact, VIP, Stand, Sponsoring
+  fonction      String?   // VIP, Stand, Sponsoring
+  entreprise    String?   // VIP, Stand, Sponsoring
+  ville         String?   // VIP, Stand, Sponsoring
+  localisation  String?   // Stand, Sponsoring
+  interlocuteur String?   // Sponsoring
+  message       String?   // Contact uniquement
+
+  // ── Backoffice ──────────────────────────
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("submissions")
+}
+
+// ─────────────────────────────────────────
+// TABLE : admins
+// Comptes pour accéder au backoffice
+// ─────────────────────────────────────────
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  // Mot de passe hashé avec bcryptjs — JAMAIS en clair
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
