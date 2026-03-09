@@ -9,10 +9,10 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 export function validationConfig(app: INestApplication): void {
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,            // Supprimer les champs non déclarés dans le DTO
+      whitelist: true, // Supprimer les champs non déclarés dans le DTO
       forbidNonWhitelisted: true, // Retourner 400 si champs inconnus envoyés
-      transform: true,            // Convertir les types automatiquement
-      stopAtFirstError: false,    // Retourner TOUTES les erreurs
+      transform: true, // Convertir les types automatiquement
+      stopAtFirstError: false, // Retourner TOUTES les erreurs
     }),
   );
 }

@@ -10,7 +10,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 export function swaggerConfig(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Submission  API')
-    .setDescription(`
+    .setDescription(
+      `
       API centralisée pour recevoir et consulter les formulaires de Submission .
 
       **Routes publiques** (pas de token) :
@@ -23,7 +24,8 @@ export function swaggerConfig(app: INestApplication): void {
       - PATCH /api/v1/admin/Submissions/:id/read
 
       Pour tester les routes privées : cliquer sur **Authorize** et coller le token.
-    `)
+    `,
+    )
     .setVersion('1.0.0')
     .addTag('Submission', 'Soumission publique des formulaires')
     .addTag('auth', 'Authentification admin')
