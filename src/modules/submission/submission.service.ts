@@ -20,7 +20,7 @@ export class SubmissionService {
       success: true,
       message: 'Votre soumission a été envoyée avec succès',
       data: {
-        id:        submission.id,
+        id: submission.id,
         createdAt: submission.createdAt,
       },
     };

@@ -4,6 +4,6 @@ import { SubmissionController } from './submission.controller';
 
 @Module({
   controllers: [SubmissionController],
-  providers:   [SubmissionService],
+  providers: [SubmissionService],
 })
 export class SubmissionModule {}

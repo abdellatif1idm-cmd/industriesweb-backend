@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateSubmissionDto {
   // ── Identification ──────────────────────────────────────────
@@ -10,8 +16,8 @@ export class CreateSubmissionDto {
 
   // plan : type de formulaire soumis
   @ApiProperty({
-    example:  'contact',
-    enum:     ['contact', 'vip', 'sponsoring', 'stand'],
+    example: 'contact',
+    enum: ['contact', 'vip', 'sponsoring', 'stand'],
     description: 'Type de formulaire',
   })
   @IsIn(['contact', 'vip', 'sponsoring', 'stand'])
@@ -20,7 +26,8 @@ export class CreateSubmissionDto {
   // type : sous-type du plan (optionnel pour contact)
   @ApiPropertyOptional({
     example: 'gold',
-    description: 'gold | platinum | silver | prestige | officiel | stand-standard | stand-premium',
+    description:
+      'gold | platinum | silver | prestige | officiel | stand-standard | stand-premium',
   })
   @IsOptional()
   @IsString()
