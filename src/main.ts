@@ -20,7 +20,11 @@ async function bootstrap() {
   swaggerConfig(app);
 
   await app.listen(process.env.PORT ?? 8080);
-  console.log(`🚀 API     : http://localhost:${process.env.PORT ?? 8080}/api/v1`);
-  console.log(`📚 Swagger : http://localhost:${process.env.PORT ?? 8080}/api/docs`);
+  console.log(
+    `🚀 API     : http://localhost:${process.env.PORT ?? 8080}/api/v1`,
+  );
+  console.log(
+    `📚 Swagger : http://localhost:${process.env.PORT ?? 8080}/api/docs`,
+  );
 }
 bootstrap();
