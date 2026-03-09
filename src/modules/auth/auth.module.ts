@@ -9,12 +9,12 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret:      process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7d' },
     }),
   ],
   controllers: [AuthController],
-  providers:   [AuthService, JwtStrategy],
-  exports:     [JwtModule],
+  providers: [AuthService, JwtStrategy],
+  exports: [JwtModule],
 })
 export class AuthModule {}

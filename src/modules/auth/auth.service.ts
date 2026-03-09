@@ -10,7 +10,7 @@ export class AuthService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwt:    JwtService,
+    private readonly jwt: JwtService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -22,7 +22,8 @@ export class AuthService {
     // 2. Vérifier existence + mot de passe en une seule condition
     // ⚠️ Ne pas préciser si c'est l'email ou le password qui est faux
     //    → évite les attaques par énumération d'emails
-    const isValid = admin && await bcrypt.compare(dto.password, admin.password);
+    const isValid =
+      admin && (await bcrypt.compare(dto.password, admin.password));
     if (!isValid) {
       throw new UnauthorizedException('Identifiants incorrects');
     }
@@ -35,8 +36,8 @@ export class AuthService {
 
     return {
       access_token: token,
-      token_type:   'Bearer',
-      expires_in:   process.env.JWT_EXPIRES_IN ?? '7d',
+      token_type: 'Bearer',
+      expires_in: process.env.JWT_EXPIRES_IN ?? '7d',
     };
   }
 }

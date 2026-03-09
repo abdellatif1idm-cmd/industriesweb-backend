@@ -20,8 +20,8 @@ export class AuthController {
     schema: {
       example: {
         access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        token_type:   'Bearer',
-        expires_in:   '7d',
+        token_type: 'Bearer',
+        expires_in: '7d',
       },
     },
   })
