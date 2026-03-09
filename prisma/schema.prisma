@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -7,57 +8,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────
-// TABLE : submissions
-// Une seule table pour tous les formulaires
-// identifiée par source + plan + type
-// ─────────────────────────────────────────
 model Submission {
-  id        String   @id @default(uuid())
-
-  // ── Identification ──────────────────────
-  // source : "PLANT MANAGER MEETING" | "FMEC"
-  source    String
-
-  // plan : "contact" | "vip" | "sponsoring" | "stand"
-  plan      String
-
-  // type : "gold" | "platinum" | "silver" | "prestige"
-  //        | "officiel" | "stand-standard" | "stand-premium"
-  //        | null pour contact
-  type      String?
-
-  // ── Champs communs à tous les formulaires ──
-  firstName     String  @map("first_name")
-  lastName      String  @map("last_name")
+  id            String   @id @default(uuid())
+  source        String
+  plan          String
+  type          String?
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
   email         String
-
-  // ── Champs optionnels selon le formulaire ──
-  phone         String?   // Contact, VIP, Stand, Sponsoring
-  fonction      String?   // VIP, Stand, Sponsoring
-  entreprise    String?   // VIP, Stand, Sponsoring
-  ville         String?   // VIP, Stand, Sponsoring
-  localisation  String?   // Stand, Sponsoring
-  interlocuteur String?   // Sponsoring
-  message       String?   // Contact uniquement
-
-  // ── Backoffice ──────────────────────────
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now()) @map("created_at")
+  phone         String?
+  fonction      String?
+  entreprise    String?
+  ville         String?
+  localisation  String?
+  interlocuteur String?
+  message       String?
+  read          Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
 
   @@map("submissions")
 }
 
-// ─────────────────────────────────────────
-// TABLE : admins
-// Comptes pour accéder au backoffice
-// ─────────────────────────────────────────
 model Admin {
   id        String   @id @default(uuid())
   email     String   @unique
-  // Mot de passe hashé avec bcryptjs — JAMAIS en clair
   password  String
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("admins")
+}
+
+model PressAccreditation {
+  id           String   @id @default(uuid())
+  source       String
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  email        String
+  phone        String
+  media        String
+  fonction     String
+  website      String?
+  coverage     String[]
+  interview    Boolean
+  pressCardUrl String?
+  status       String   @default("pending")
+  read         Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("press_accreditations")
+}
+
+view stats_view {
+  submissions_total  BigInt?
+  submissions_unread BigInt?
+  press_total        BigInt?
+  press_unread       BigInt?
+  press_pending      BigInt?
+  press_approved     BigInt?
+  press_rejected     BigInt?
 }
