@@ -5,29 +5,29 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Lister les soumissions avec pagination et filtres optionnels.
-   * Filtres disponibles : source, plan, type
-   */
+  // ─────────────────────────────────────────
+  // SUBMISSIONS
+  // ─────────────────────────────────────────
+
   async getSubmissions(
-    page   = 1,
-    limit  = 20,
+    page = 1,
+    limit = 20,
     source?: string,
-    plan?:   string,
-    type?:   string,
+    plan?: string,
+    type?: string,
   ) {
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     const where = {
       ...(source && { source }),
-      ...(plan   && { plan   }),
-      ...(type   && { type   }),
+      ...(plan && { plan }),
+      ...(type && { type }),
     };
 
     const [data, total] = await Promise.all([
       this.prisma.submission.findMany({
         where,
         skip,
-        take:    limit,
+        take: limit,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.submission.count({ where }),
@@ -44,61 +44,130 @@ export class AdminService {
     };
   }
 
-  /**
-   * Récupérer une soumission par son ID.
-   */
   async getSubmissionById(id: string) {
     const submission = await this.prisma.submission.findUnique({
       where: { id },
     });
-
-    if (!submission) throw new NotFoundException(`Soumission #${id} introuvable`);
-
+    if (!submission)
+      throw new NotFoundException(`Soumission #${id} introuvable`);
     return submission;
   }
 
-  /**
-   * Marquer une soumission comme lue.
-   */
   async markAsRead(id: string) {
-    await this.getSubmissionById(id); // Vérifie que la soumission existe
-
+    await this.getSubmissionById(id);
     return this.prisma.submission.update({
       where: { id },
-      data:  { read: true },
+      data: { read: true },
     });
   }
 
-  /**
-   * Statistiques globales :
-   * total, non lus, répartition par source et par plan/type
-   */
   async getStats() {
-    const [total, unread, bySource, byPlan] = await Promise.all([
-      this.prisma.submission.count(),
-      this.prisma.submission.count({ where: { read: false } }),
-      this.prisma.submission.groupBy({
-        by:     ['source'],
-        _count: { source: true },
+    const [stats, bySourceSubmissions, byPlanSubmissions, bySourcePress] =
+      await Promise.all([
+        // ✅ Query propre via Prisma Client — plus de $queryRaw
+        this.prisma.stats_view.findFirst(),
+
+        this.prisma.submission.groupBy({
+          by: ['source'],
+          _count: { source: true },
+        }),
+        this.prisma.submission.groupBy({
+          by: ['plan', 'type'],
+          _count: { plan: true },
+        }),
+        this.prisma.pressAccreditation.groupBy({
+          by: ['source'],
+          _count: { source: true },
+        }),
+      ]);
+
+    return {
+      submissions: {
+        total: Number(stats?.submissions_total ?? 0),
+        unread: Number(stats?.submissions_unread ?? 0),
+        bySource: bySourceSubmissions.map((s) => ({
+          source: s.source,
+          count: s._count.source,
+        })),
+        byPlan: byPlanSubmissions.map((p) => ({
+          plan: p.plan,
+          type: p.type,
+          count: p._count.plan,
+        })),
+      },
+      press: {
+        total: Number(stats?.press_total ?? 0),
+        unread: Number(stats?.press_unread ?? 0),
+        pending: Number(stats?.press_pending ?? 0),
+        approved: Number(stats?.press_approved ?? 0),
+        rejected: Number(stats?.press_rejected ?? 0),
+        bySource: bySourcePress.map((s) => ({
+          source: s.source,
+          count: s._count.source,
+        })),
+      },
+    };
+  }
+
+  // ─────────────────────────────────────────
+  // PRESS ACCREDITATIONS
+  // ─────────────────────────────────────────
+
+  async getPressAccreditations(
+    page = 1,
+    limit = 20,
+    source?: string,
+    status?: string,
+  ) {
+    const skip = (page - 1) * limit;
+    const where = {
+      ...(source && { source }),
+      ...(status && { status }),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.pressAccreditation.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.submission.groupBy({
-        by:     ['plan', 'type'],
-        _count: { plan: true },
-      }),
+      this.prisma.pressAccreditation.count({ where }),
     ]);
 
     return {
-      total,
-      unread,
-      bySource: bySource.map(s => ({
-        source: s.source,
-        count:  s._count.source,
-      })),
-      byPlan: byPlan.map(p => ({
-        plan:  p.plan,
-        type:  p.type,
-        count: p._count.plan,
-      })),
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
+  }
+
+  async getPressAccreditationById(id: string) {
+    const accreditation = await this.prisma.pressAccreditation.findUnique({
+      where: { id },
+    });
+    if (!accreditation)
+      throw new NotFoundException(`Accréditation #${id} introuvable`);
+    return accreditation;
+  }
+
+  async updatePressStatus(id: string, status: string) {
+    await this.getPressAccreditationById(id);
+    return this.prisma.pressAccreditation.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
+  async markPressAsRead(id: string) {
+    await this.getPressAccreditationById(id);
+    return this.prisma.pressAccreditation.update({
+      where: { id },
+      data: { read: true },
+    });
   }
 }
